@@ -115,11 +115,11 @@ HookLink checks for updates every time you open it (and from **HookLink → Chec
 - **GPU:** nxnative's latest work for this game: occlusion tests that let hidden grass be skipped, faster mesh-shader loads (the foliage), no 2 ms GPU wait each frame, faster shader math, and the mist without dark specks.
 - **Mesh shaders:** the foliage, shadow and enemy shaders are prepared before the game starts and saved, instead of freezing the game the first time each one is drawn.
 - **Frame pacing:** the thread that sends each frame to the GPU always runs in iOS's top class, so the busy areas run on the fast cores.
-- **Memory:** freed render targets' memory is reused for the next one, and textures of scenes you've left are retired when memory runs short (fixes the freeze after the talk with Saria).
+- **Memory:** freed render targets' memory is reused for the next one, and textures of scenes you've left are retired when memory runs short (fixes the freeze after the talk with Saria). The game gets 8 GB of address space on the phone, which it needs from the Master Sword on (fixes the white screen there).
 - **Game speed:** the game moves at real speed even when a frame runs long, without dropping to 30 fps.
 - **Resolution:** the handheld dynamic resolution ranges from 1080×608 down to 640×360 on the phone, made from your own game files.
 - **Controls:** a glass look on every on-screen layout, and a Mobile layout with a floating stick, glass buttons and a D-pad (inspired by cheemu21's kid-with-sword; from the [kid-with-sword fork](https://github.com/ednofedulo/kid-with-sword-remake-detached-20261108) of nxnative).
-- **Wide view:** an optional launcher setting that fills an iPhone screen with a wider view and no black bars (from nxnative pull request 1460 by vladbondarenko97).
+- **Wide view (experimental):** an optional launcher setting that fills an iPhone screen with a wider 3D view. The HUD and menus are still stretched, and it runs slower (from nxnative pull request 1460 by vladbondarenko97).
 - **Settings:** thread priorities, no 30 fps hold, no 30 fps thermal cap.
 
 ## Disk space
@@ -164,6 +164,7 @@ Still stuck? Click **Get game log** on HookLink's last step, then [open an issue
 - **[PromethOps](https://github.com/PromethOps)**: [nxnative PR #1455](https://github.com/seedds/nxnative/pull/1455), unused textures are retired when GPU memory runs short (the freeze after the talk with Saria).
 - **[LeonardoBai12](https://github.com/LeonardoBai12)**: [nxnative PR #1543](https://github.com/seedds/nxnative/pull/1543), the game keeps real speed below 60 fps.
 - **[vladbondarenko97](https://github.com/vladbondarenko97)**: [nxnative PR #1460](https://github.com/seedds/nxnative/pull/1460), the code locations behind Wide view.
+- **[oliverames](https://github.com/oliverames)**: tested the engine on an iPhone Duo, and found and fixed the game running fast below 60 fps ([issue #1](https://github.com/dsi-hub/HookLink/issues/1)).
 - **gunvalk**: found that the game's frame step ignores the frame's time (zortos293/Lichii PR #216), the basis of the real-speed fix.
 - **[cheemu21](https://github.com/cheemu21)**, creator of kid-with-sword: inspired HookLink's touch controls, the glass look and the Mobile layout.
 - **[HookShot](https://github.com/NotRexed/Hookshot)** by NotRexed: inspired HookLink's name.

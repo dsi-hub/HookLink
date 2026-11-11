@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.7
+
+Fixes the game stopping when you pull the Master Sword, makes Wide view widen the 3D world, and brings engine fixes from nxnative and from a tester. The fixes were played on an iPhone 18 Pro Max in test builds; the final 1.7 build itself has not been played yet, so please share your game log (**Get game log**) if something looks or runs wrong.
+
+**Fixed: white screen after pulling the Master Sword.** The game stayed on a white screen for good, with no sound, and you could not become adult Link. On an iPhone the engine gave the game 4 GB of address space, and the game had used nearly all of it by then, so the next scene's movie and files had nowhere to go. It now gets 8 GB, and a limit on how much it may map at once is off. Tested on an iPhone 18 Pro Max: the movie plays and the game goes on. The game uses more memory than before (about 4.7 GB in our test, 5.4 GB at most); if it closes by itself on your phone, please send your log.
+
+**Wide view is now experimental.** It is labelled that way in the game's launcher, and it stays off by default.
+- **Fixed:** the 3D world is now wider instead of stretched. The 1.6 notes said this was fixed, but that fix did not work on a phone.
+- **Not fixed yet:** the HUD and every menu, the title screen included, are stretched sideways.
+- **Slower:** it costs clearly more than the "little slower" the launcher said before. In our test Hyrule Field ran at about 40 fps with it on.
+
+**Fixed: the game ran a little fast below 60 fps.** When the frame rate dropped, the game made up the lost time twice and ran 9 to 17% too fast between 30 and 60 fps. Found and fixed by oliverames, who tested HookLink's engine on an iPhone Duo.
+
+**From nxnative (29 commits):**
+- **Textures:** streamed scenery such as the cliff beside the Castle Town wall no longer draws with the wrong texture, and terrain no longer turns into crossing stripes after entering or leaving a dungeon.
+- **Stutter:** many more pipelines are prepared before play, so there are fewer hitches the first time you see a new place.
+- **CPU and heat:** two engine threads no longer fight over a lock, and short waits wake the CPU far less often.
+- **Castle Town:** a search of the pipeline archive that repeated on every draw is now remembered, next to HookLink's own fix for the same slowdown.
+
+**Known issues**
+- With Wide view on, the HUD and menus are stretched and the frame rate is lower (see above).
+- After you become adult Link, busy areas ran at 32 to 46 fps in our test, with Wide view off and the phone warm. We have not found the cause yet.
+- Movies and subtitles drift apart below 60 fps. A fix from oliverames is in the engine but not turned on, because it needs a 30 fps cap.
+- Some surfaces can show as flat single-colour shapes with hard edges. We don't know yet whether this update changes that.
+
+**To update:** open HookLink and click **Update and rebuild** on the update banner, then install the new app over the old one. Your saves and game files stay on the phone. This update changes the shaders, so every shader is compiled again: the rebuild took about 2 hours on our Mac. Keep the Mac awake and plugged in while it runs, because sleep pauses it. The first "Preparing shaders" on the phone takes a few minutes. If the first session after that feels slow, close the game fully and reopen it.
+
 ## 1.6
 
 Wide view now shows more of the game, plus 14 engine fixes from nxnative. **This update has been built but not played on a phone yet**, so please share your game log (**Get game log**) if something looks or runs wrong.
