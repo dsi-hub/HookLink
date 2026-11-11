@@ -2,67 +2,169 @@
 
 ## 1.8
 
-A new launcher inside the game, a choice of frame rate with frame generation, steadier memory, a new look for HookLink, Mac builds, and 64 engine commits from nxnative. Played on an iPhone 18 Pro Max in test builds. Please share your game log (**Extras → Export game log**) if something looks or runs wrong.
+Ocarina of Time now builds as a **native Mac app** as well as an iPhone app. 1.8 also brings:
+- a new launcher inside the game (iPhone and Mac)
+- frame rate modes with frame generation
+- more touch-control options
+- a memory safety cutoff
+- better frame pacing
+- a new look for HookLink
+- 64 engine commits from nxnative
 
-**New: the game's launcher.** Before the game starts you get three tabs. Play is in the middle, and you can switch with L and R.
-- **Play:** the game, its version and a Play button, next to a summary of how it will run.
-- **Settings:** every option in one list.
-- **Extras:**
-  - Export your saves or the game log to Files, AirDrop or another app.
-  - Import a save. Your current save is backed up first.
-  - Cloud saves.
-  - Cheat files.
-  - **Reset to tested defaults.**
-  - The credits.
+Everything on iPhone was played on an iPhone 18 Pro Max (iOS 27.2) in test builds. The Mac app and the iPhone 16 Pro have **not** been played yet. Please share your game log (**Extras → Export game log**) if something looks or runs wrong.
 
-**New: Frame rate mode.** One choice with four options:
-- 60 fps
-- 30 fps steady
-- **30 fps + frame generation** (the new default)
-- 60 fps + frame generation, for 120 Hz screens
+### 🖥️ New: a native Mac app (experimental)
 
-Frame generation draws 30 frames and MetalFX shows 60. On our iPhone 18 Pro Max it looked like 60 fps with no smearing, and the phone stays cooler. 60 fps + frame generation sat at about 35 fps in our test. Plain 60 fps restarted the phone once (see Known issues).
+HookLink can build the game as a double-clickable app for your **Apple silicon Mac**, not only for an iPhone.
 
-**New defaults.** **Reset to tested defaults** sets the best settings we found: 30 fps + frame generation, and MetalFX upscaling.
+- **How:** in **Choose device**, pick **This Mac (M…)**, then **Build**. The Install and Copy game files steps are skipped, because the game's files go inside the app. When the build is done, **Play** offers **Open the game** and **Show in Finder**. The app is called *Ocarina of Time (HookLink).app* and sits in HookLink's build folder; you can move it to Applications.
+- **How it runs:**
+  - Docked mode at a 1440p output, with dynamic resolution on.
+  - Real game speed below 60 fps, the same frame-step fix as on the iPhone.
+  - The shaders are compiled for your Mac's own GPU.
+- **Controls:**
+  - Keyboard and controllers both work. The keyboard is player 1 together with the first controller.
+  - Shift + arrow keys move the camera (the right stick).
+- **Launcher:** the same Settings / Play / Extras launcher as the iPhone. On the Mac, Extras opens the saves folder, the logs and the cheats folder in Finder. It also has cloud saves, **Reset to tested defaults** and the credits.
+- **Status: new and untested.** It has been built, but nobody has played it yet. Expect rough edges and please open an issue with your log. iPhone-only settings (touch controls, Wide view) aren't shown on the Mac.
 
-**Touch controls:**
-- An **opacity** slider (20–100%) fades all the on-screen controls together.
-- The Mobile layout now follows the Classic and Forest themes, with flat keys. Before, it stayed glassy whatever the theme.
-- Mobile, 3D, 2D and tap layouts and controllers all work as before.
+### New: the game's launcher (iPhone and Mac)
 
-**Memory:** the 8 GB layout from 1.7 stays, without a mapping limit. A new last-resort cutoff stops the game from mapping past 10 GB, or past what iOS has left minus 768 MB, so the system frees cached memory instead of closing the game. 1.8 uses more memory than 1.7: about 6.4–6.9 GB in our test.
+When you open the game you now get a menu with three tabs before it starts: **Settings · Play · Extras**. It opens on Play, in the middle. Switch tabs with **L / R** on a controller, or by tapping.
 
-**Wide view (still experimental):**
-- The game now lays out its screen at the wider width, so the HUD and menus should no longer be stretched. This has not been confirmed on a phone yet.
-- The 3D view is never widened twice.
+- **Play**
+  - **Left side:** the game's icon, its title, the version and a gold **Play** button.
+  - **Right side, "How it will run":** your frame rate mode, dynamic resolution, Wide view, touch controls style and free storage. Tap a row to jump to that setting.
+  - A warning appears when your phone has less than 25 GB free.
+  - Before playing, the launcher checks your cloud save. If both copies changed, it asks which one to keep.
+- **Settings:** every option in one list with a description panel. Each one says when it takes effect.
+- **Extras**
+  - **Export saves:** sends a copy of your save folder to Files, AirDrop or another app. Your save stays on the phone.
+  - **Import a save:** pick a save folder, or a folder that holds one. Your current save is backed up to `save-backups` first. Unzip a .zip in Files before importing it.
+  - **Export game log:** the log to attach to bug reports.
+  - **Cloud saves:** turn iCloud sync on or off.
+  - **Cheats:** cheat files you put in the game's `cheats` folder (Files → On My iPhone → the game → `cheats`) are listed and switched on here. HookLink doesn't ship any cheats.
+  - **Reset to tested defaults:** see below.
+  - **Credits.**
 
-**Speed:** the thread that shows the game's frames now asks iOS for its own frame deadline. Before, iOS could keep it on the slow cores in Hyrule Field and the adult world. How much this helps has not been measured yet.
+### New: Frame rate mode
 
-**HookLink on the Mac:**
-- **A new look:** a sky with clouds, steps as buttons, and sharper lettering.
-- **Choose device** (shorter name) now lists:
-  - **iPhone 16 Pro / 16 Pro Max (A18 Pro):** not tested, and it has 8 GB of memory, so the game may close in busy areas.
-  - **This Mac:** builds a Mac app with the same launcher. New and **not tested yet**.
+One choice in **Settings → Game** replaces the old frame rate settings:
 
-**From nxnative (64 commits), the ones that matter here:**
-- **Building:** .NET is no longer needed. Shaders are finished in parallel worker processes, so a cold build uses all your Mac's cores.
-- **Graphics:**
-  - Movies into linear textures are no longer black.
-  - Padded texture layouts are fixed.
-  - NaN colours no longer show through blending.
-- **CPU:** frames share command allocators. Argument blocks are patched instead of encoded again. Uniform bounds are checked once per binding.
-- **Memory:** textures resized by dynamic resolution reuse recycled memory.
-- **Cloud saves:** when both saves changed, the launcher asks which one to keep. Automated runs never sync.
-- **Also from cheemu21:** the steady-30 and frame generation work this release builds on.
+| Mode | What it does |
+|---|---|
+| **60 fps** | Full 60 fps, the most demanding. Busy areas dip and the phone gets warm (see Known issues). |
+| **30 fps steady** | A locked, even 30 with steady frame pacing. Coolest and longest battery life. |
+| **30 fps + frame generation** *(default)* | The game draws a steady 30, and Apple's **MetalFX frame interpolation** makes a frame between each two, so the screen shows 60. It's much less work and heat than real 60, with a little more input delay; very fast motion can smear slightly. On our iPhone 18 Pro Max it looked like 60 fps with no visible smearing, and it stayed smooth through Hyrule Field. |
+| **60 fps + frame generation** *(experimental)* | The game aims for 60 and frame generation doubles it on a 120 Hz ProMotion screen. In our test it sat at about 35 fps in busy areas, so it isn't recommended yet. |
 
-**Known issues**
-- **Plain 60 fps** restarted an iPhone 18 Pro Max once in Hyrule Field. Use 30 fps + frame generation (the default) until this is found. If it happens to you, please send the log from your next start.
+The game keeps real speed in every mode.
+
+### New: tested defaults
+
+**Reset to tested defaults** (Extras) sets the best settings we found, and new installs start with them:
+- **Frame rate mode:** 30 fps + frame generation.
+- **Game's upscaler:** MetalFX. Apple's upscaler gives the same picture for far less GPU time than the game's own upscaling network. An iPhone 17 Pro player found the game's own one too heavy (issue #3).
+- Everything else goes back to its default.
+
+Settings you changed yourself are kept when you update. Settings you never touched move to the new defaults.
+
+### Touch controls (iPhone)
+
+- **Layouts:** Mobile (a floating stick, camera on the right half of the screen, a D-pad), 3D, 2D and tap. Any controller works too.
+- **New: Touch controls opacity.** A slider in **Settings → Controls** from 20% to 100%. Every on-screen button, the stick and the menu button fade together. Takes effect the next time the game starts.
+- **Fixed: the Mobile layout under Classic and Forest.** Before, it always looked glassy. Now its keys, stick ring and menu button are flat keys in the theme's own colours and rims. The **Glass** theme keeps the glass look.
+
+### Wide view (still experimental)
+
+Wide view fills the whole iPhone screen, with no black bars, by widening the 3D view (off by default).
+- **New in 1.8:** the game now lays out its screen at the wider width, so the **HUD and menus should keep their normal size** instead of stretching sideways. The 3D camera is never widened twice. **This hasn't been confirmed on a phone yet**, so please send a screenshot or log either way.
+- It still draws about a fifth more pixels, so it's slower and warmer than the normal view.
+
+### Memory: a safety cutoff
+
+1.7 gave the game an 8 GB address space and turned off its mapping limit to fix the white screen after the Master Sword. 1.8 keeps that and adds a **last-resort cutoff**. The engine refuses new memory when the game already holds 10 GB, or when less than 768 MB is left before iOS's limit for the app. The game then frees its own cached memory instead of iOS closing it.
+
+1.8 uses more memory than 1.7: about 6.4–6.9 GB in our test.
+
+### Frame pacing
+
+On iPhone, the thread that hands each finished frame to the screen now declares its own frame deadline to iOS. In Hyrule Field and the adult world, iOS had been keeping that thread on the slow efficiency cores (1.3–1.7 GHz instead of about 3.7). How much this helps hasn't been measured yet.
+
+### HookLink (the Mac app you build with)
+
+- **A new look, after the game's file-select screen:**
+  - Each step is a pill button with its status.
+  - The panel sits at 80% opacity over a drawn sky with clouds.
+  - The lettering is sharper.
+- **"Choose your iPhone" is now "Choose device"**, with:
+  - **iPhone 18 Pro / Pro Max:** tested.
+  - **iPhone 17 family:** a player runs it on a 17 Pro, with 30 fps + frame generation recommended.
+  - **iPhone 16 Pro / 16 Pro Max (A18 Pro):** new, **untested**. These have 8 GB of memory, so the game may close in busy areas.
+  - **This Mac:** new, **untested**. See above.
+- The README's status table, requirements and credits are updated.
+
+### From nxnative (64 commits)
+
+The ones that matter for Ocarina of Time and for building:
+
+- **Building**
+  - .NET is no longer needed: the shader translator and the file extractor come as native executables.
+  - Shaders are finished in worker processes, so a cold build uses every core of your Mac.
+  - Mac shaders are compiled for the Mac's minimum macOS, so every Mac gets the same result.
+- **Graphics**
+  - Movies played into linear textures are no longer black.
+  - Textures whose width isn't a whole number of tiles keep the game's padding.
+  - NaN or infinite colours under a zero blend weight no longer show, matching the console.
+  - New multisample textures start cleared.
+  - A view keeps its parent texture alive.
+  - Unused border corrections are compiled out of pipelines.
+- **CPU and stutter**
+  - The submissions of one frame share a command allocator.
+  - Argument blocks whose only change is a uniform binding are patched instead of encoded again.
+  - Uniform reads are bounded once per binding instead of on every read.
+  - Pipeline bases the archives lack are remembered for the run.
+  - Short sleeps become polls.
+  - Vertex-attribute conversions are kept while their source is unchanged.
+- **Memory:** textures resized by dynamic resolution take recycled memory instead of new Metal memory each time.
+- **Saves:**
+  - When both the cloud save and this device's save changed, the launcher asks which to keep.
+  - The launcher waits for a cloud save iCloud has only listed.
+  - Automated runs never sync with your cloud save.
+- **Controllers:**
+  - A controller with a second, silent device entry stays one player.
+  - Switch 2 controllers can join with a button press.
+  - Touch works after leaving the dock.
+  - DualSense haptics keep both handles.
+- **From cheemu21's kid-with-sword-remake:** the steady 30 fps (V17) and the frame generation work (X2–X9) the frame rate modes are built on.
+
+### Known issues
+
+- **Plain 60 fps restarted an iPhone 18 Pro Max once** in Hyrule Field (the GPU stopped responding and iOS restarted). Use 30 fps + frame generation (the default) until we find the cause. If it happens to you, open the game again afterwards and send the log from **Extras → Export game log**.
 - **60 fps + frame generation** reaches only about 35 fps in busy areas.
-- **Wide view** is still slower.
-- **Memory use** is higher than 1.7.
-- **Movies and subtitles** can still drift apart below 60 fps.
+- **Wide view** is slower, and its HUD fix is unconfirmed (see above).
+- **Memory:** 1.8 uses more memory than 1.7.
+- **Movies and subtitles** can drift apart below 60 fps.
+- **Untested:** the Mac app and the iPhone 16 Pro have not been played yet.
+- **Surfaces:** some can still show as flat single-colour shapes.
 
-**To update:** open HookLink and click **Update and rebuild**, then install the new app over the old one. Your saves and game files stay on the phone. This update changes the shaders, so every shader is compiled again, which takes about 2 hours. Keep the Mac awake and plugged in. Your launcher choices are kept, but the frame rate mode starts at the new default unless you changed it.
+### To update
+
+- **iPhone:** open HookLink and click **Update and rebuild** on the update banner, then install the new app over the old one. Your saves and game files stay on the phone.
+- **Rebuild time:** this update changes the shaders, so every shader is compiled again, which took about 2 hours on our Mac. Keep the Mac awake and plugged in while it runs, because sleep pauses it.
+- **First start:** "Preparing shaders" takes a few minutes. If the first session after that feels slow, close the game fully and reopen it.
+- **Mac app:** a separate build. Choose **This Mac** under Choose device and build. The iPhone build and its files aren't touched.
+
+### Credits
+
+- **[seedds](https://github.com/seedds)** and nxnative's contributors for nxnative, which all of this runs on.
+- **[cheemu21](https://github.com/cheemu21)** for kid-with-sword-remake: the steady 30 fps, frame generation and the 8 GB memory layout, plus the inspiration for the touch controls.
+- **ednofedulo** and the kid-with-sword contributors.
+- **oliverames** for the frame-step fixes and iPhone testing.
+- **gunvalk** for the frame-step finding.
+- **vladbondarenko97** for the wide-view sites.
+- **PromethOps** and **LeonardoBai12** for their nxnative pull requests.
+- Everyone who tested and sent logs.
 
 ## 1.7
 
