@@ -17,10 +17,10 @@ struct Lettering: ViewModifier {
     func body(content: Content) -> some View {
         let o = HLStyle.outline
         return content
-            .font(.system(size: size, weight: .black, design: .default)).tracking(size * 0.07)
+            .font(.system(size: size, weight: .bold, design: .default)).tracking(size * 0.03)
             .foregroundStyle(shaded ? AnyShapeStyle(LinearGradient(colors: bright ? [.white, Color(red: 0.85, green: 1, blue: 0.97)] : [Color(red: 0.90, green: 0.92, blue: 0.97), Color(red: 0.62, green: 0.67, blue: 0.78)], startPoint: .top, endPoint: .bottom)) : AnyShapeStyle(color))
-            .shadow(color: o, radius: 0, x: 1, y: 0).shadow(color: o, radius: 0, x: -1, y: 0).shadow(color: o, radius: 0, x: 0, y: 1).shadow(color: o, radius: 0, x: 0, y: -1)
-            .shadow(color: o.opacity(0.9), radius: 0, x: 1.5, y: 2.5)
+            .shadow(color: o, radius: 0, x: 0.75, y: 0).shadow(color: o, radius: 0, x: -0.75, y: 0).shadow(color: o, radius: 0, x: 0, y: 0.75).shadow(color: o, radius: 0, x: 0, y: -0.75)
+            .shadow(color: o.opacity(0.75), radius: 0, x: 1, y: 1.5)
     }
 }
 extension View { func lettering(_ size: CGFloat, shaded: Bool = false, bright: Bool = false, color: Color = .white) -> some View { modifier(Lettering(size: size, shaded: shaded, bright: bright, color: color)) } }
@@ -85,15 +85,15 @@ struct ContentView: View {
                         }.padding(12)
                         if showLog { LogView().frame(height: 170) }
                     }
-                    .background(HLStyle.detail).overlay(Rectangle().stroke(Color(red: 0.31, green: 0.40, blue: 0.62), lineWidth: 1))
+                    .background(Color(red: 0.02, green: 0.035, blue: 0.15).opacity(0.80)).overlay(Rectangle().stroke(Color(red: 0.31, green: 0.40, blue: 0.62), lineWidth: 1))
                 }
                 .padding(.leading, 34).padding(.trailing, 26).padding(.vertical, 20)
             }
-            .background(HLStyle.panel).clipShape(CutCorner()).overlay(CutCorner().stroke(HLStyle.line, lineWidth: 1))
+            .background(HLStyle.panel.opacity(0.8)).clipShape(CutCorner()).overlay(CutCorner().stroke(HLStyle.line, lineWidth: 1))
             Text("Click - Open  \u{2022}  Return - Next").lettering(17, color: Color(red: 0.50, green: 0.88, blue: 0.81))
         }
         .padding(.horizontal, 54).padding(.top, 34).padding(.bottom, 20)
-        .background(HLStyle.ground.ignoresSafeArea())
+        .background(SkyBackground().ignoresSafeArea())
         .preferredColorScheme(.dark)
         .frame(minWidth: 1040, minHeight: 700)
         .task { await app.checkForUpdates() }   // at every launch: quiet when offline
