@@ -1,34 +1,114 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
+// The window, in the look of a file-select screen: one steel-blue panel with a cut corner on a black-to-blue ground, a title strip, the steps as pill buttons down the left
+// (the chosen one outlined in teal), the chosen step's page in a dark panel on the right, and a hint line underneath.
+enum HLStyle {
+    static let teal = Color(red: 0.56, green: 0.90, blue: 0.84), line = Color(red: 0.45, green: 0.54, blue: 0.80), dim = Color(red: 0.66, green: 0.73, blue: 0.92)
+    static let ground = LinearGradient(colors: [Color(red: 0, green: 0, blue: 0.016), Color(red: 0.008, green: 0.016, blue: 0.10), Color(red: 0.04, green: 0.10, blue: 0.43), Color(red: 0.07, green: 0.19, blue: 0.66)], startPoint: .top, endPoint: .bottom)
+    static let panel = LinearGradient(colors: [Color(red: 0.20, green: 0.28, blue: 0.56), Color(red: 0.11, green: 0.17, blue: 0.42), Color(red: 0.24, green: 0.34, blue: 0.65), Color(red: 0.12, green: 0.19, blue: 0.46), Color(red: 0.08, green: 0.12, blue: 0.35)], startPoint: .topLeading, endPoint: .bottomTrailing)
+    static let detail = Color(red: 0.02, green: 0.035, blue: 0.15).opacity(0.90)
+    static func heavy(_ size: CGFloat) -> Font { .system(size: size, weight: .heavy, design: .rounded) }
+    static let outline = Color(red: 0.03, green: 0.05, blue: 0.20)
+}
+/// The file-select lettering: wide, black-weight letters with a dark navy outline and a drop under them. shaded: the step names' fill, light at the top and grey below
+struct Lettering: ViewModifier {
+    var size: CGFloat, shaded = false, bright = false, color: Color = .white
+    func body(content: Content) -> some View {
+        let o = HLStyle.outline
+        return content
+            .font(.system(size: size, weight: .black, design: .default)).tracking(size * 0.07)
+            .foregroundStyle(shaded ? AnyShapeStyle(LinearGradient(colors: bright ? [.white, Color(red: 0.85, green: 1, blue: 0.97)] : [Color(red: 0.90, green: 0.92, blue: 0.97), Color(red: 0.62, green: 0.67, blue: 0.78)], startPoint: .top, endPoint: .bottom)) : AnyShapeStyle(color))
+            .shadow(color: o, radius: 0, x: 1, y: 0).shadow(color: o, radius: 0, x: -1, y: 0).shadow(color: o, radius: 0, x: 0, y: 1).shadow(color: o, radius: 0, x: 0, y: -1)
+            .shadow(color: o.opacity(0.9), radius: 0, x: 1.5, y: 2.5)
+    }
+}
+extension View { func lettering(_ size: CGFloat, shaded: Bool = false, bright: Bool = false, color: Color = .white) -> some View { modifier(Lettering(size: size, shaded: shaded, bright: bright, color: color)) } }
+struct CutCorner: Shape {
+    var cut: CGFloat = 34
+    func path(in r: CGRect) -> Path {
+        var p = Path(); p.move(to: CGPoint(x: r.minX + cut, y: r.minY)); p.addLine(to: CGPoint(x: r.maxX, y: r.minY)); p.addLine(to: CGPoint(x: r.maxX, y: r.maxY))
+        p.addLine(to: CGPoint(x: r.minX, y: r.maxY)); p.addLine(to: CGPoint(x: r.minX, y: r.minY + cut)); p.closeSubpath(); return p
+    }
+}
+/// A step's pill button: steel blue with chunky grey lettering, outlined and glowing in teal when it is the chosen step
+struct PillStyle: ButtonStyle {
+    var selected = false
+    func makeBody(configuration: Configuration) -> some View {
+        let shape = UnevenRoundedRectangle(topLeadingRadius: 9, bottomLeadingRadius: 9, bottomTrailingRadius: 20, topTrailingRadius: 20)
+        return configuration.label
+            .padding(.leading, 18).padding(.trailing, 14).frame(maxWidth: .infinity, minHeight: 38, alignment: .leading)
+            .background(LinearGradient(colors: selected ? [Color(red: 0.44, green: 0.61, blue: 0.71), Color(red: 0.22, green: 0.35, blue: 0.50)] : [Color(red: 0.28, green: 0.38, blue: 0.62), Color(red: 0.13, green: 0.21, blue: 0.45)], startPoint: .top, endPoint: .bottom))
+            .clipShape(shape).overlay(shape.stroke(selected ? Color(red: 0.79, green: 1, blue: 0.96) : HLStyle.line, lineWidth: selected ? 2 : 1))
+            .shadow(color: selected ? HLStyle.teal.opacity(0.8) : .clear, radius: 7)
+            .opacity(configuration.isPressed ? 0.8 : 1).contentShape(shape)
+    }
+}
+
 struct ContentView: View {
     @EnvironmentObject var app: HookLink
     @State private var showLog = false
 
     var body: some View {
-        NavigationSplitView {
-            List(Step.allCases, selection: Binding(get: { app.step }, set: { if let s = $0, !app.busy { app.step = s } })) { s in
-                Label(s.title, systemImage: icon(s)).tag(s)
-            }
-            .safeAreaInset(edge: .bottom) { VersionPanel() }
-            .navigationSplitViewColumnWidth(min: 220, ideal: 240)
-        } detail: {
+        VStack(spacing: 14) {
             VStack(spacing: 0) {
-                if app.engineUpdate != nil || app.appUpdate != nil || !app.updateMessage.isEmpty { UpdateBanner(); Divider() }
-                if let w = app.work { ProgressCard(w: w).padding(.horizontal, 20).padding(.top, 12) }
-                ScrollView { page.padding(28).frame(maxWidth: 680, alignment: .leading).frame(maxWidth: .infinity, alignment: .leading) }
-                Divider()
                 HStack {
-                    Button(showLog ? "Hide details" : "Show details") { showLog.toggle() }.buttonStyle(.link)
+                    Text("Please select a step.").lettering(25)
                     Spacer()
-                    if app.step != .welcome { Button("Back") { app.step = Step(rawValue: app.step.rawValue - 1)! }.disabled(app.busy) }
-                    if app.step != .done { Button("Next") { app.step = Step(rawValue: app.step.rawValue + 1)! }.keyboardShortcut(.defaultAction).disabled(app.busy || !canGoOn) }
-                }.padding(12)
-                if showLog { LogView().frame(height: 180) }
+                    Text("HookLink \(AppInfo.version)").lettering(14, shaded: true)
+                }
+                .padding(.leading, 52).padding(.trailing, 26).frame(height: 58)
+                .background(Color(red: 0.02, green: 0.035, blue: 0.16).opacity(0.65)).overlay(Rectangle().fill(HLStyle.line).frame(height: 1), alignment: .bottom)
+                HStack(alignment: .top, spacing: 22) {
+                    VStack(spacing: 8) {
+                        ForEach(Step.allCases) { s in
+                            Button { if !app.busy && app.offered(s) { app.step = s } } label: {
+                                HStack { Text(s.title).lettering(17, shaded: true, bright: app.step == s).lineLimit(1).minimumScaleFactor(0.8); Spacer(); Text(status(s)).font(.system(size: 11.5, weight: .bold, design: .rounded)).foregroundStyle(app.step == s ? Color(red: 0.84, green: 1, blue: 0.97) : HLStyle.dim).lineLimit(1) }
+                            }
+                            .buttonStyle(PillStyle(selected: app.step == s)).disabled(app.busy && app.step != s).opacity(app.offered(s) ? 1 : 0.35)
+                            .accessibilityAddTraits(app.step == s ? .isSelected : [])
+                        }
+                        Spacer(minLength: 8)
+                        VersionPanel()
+                    }
+                    .frame(width: 262)
+                    VStack(spacing: 0) {
+                        if app.engineUpdate != nil || app.appUpdate != nil || !app.updateMessage.isEmpty { UpdateBanner(); Divider() }
+                        if let w = app.work { ProgressCard(w: w).padding(.horizontal, 20).padding(.top, 12) }
+                        ScrollView { page.padding(24).frame(maxWidth: 680, alignment: .leading).frame(maxWidth: .infinity, alignment: .leading) }
+                        Divider()
+                        HStack {
+                            Button(showLog ? "Hide details" : "Show details") { showLog.toggle() }.buttonStyle(.link)
+                            Spacer()
+                            if app.step != .welcome { Button("Back") { app.step = app.step(before: app.step) }.disabled(app.busy) }
+                            if app.step != .done { Button("Next") { app.step = app.step(after: app.step) }.keyboardShortcut(.defaultAction).disabled(app.busy || !canGoOn) }
+                        }.padding(12)
+                        if showLog { LogView().frame(height: 170) }
+                    }
+                    .background(HLStyle.detail).overlay(Rectangle().stroke(Color(red: 0.31, green: 0.40, blue: 0.62), lineWidth: 1))
+                }
+                .padding(.leading, 34).padding(.trailing, 26).padding(.vertical, 20)
             }
+            .background(HLStyle.panel).clipShape(CutCorner()).overlay(CutCorner().stroke(HLStyle.line, lineWidth: 1))
+            Text("Click - Open  \u{2022}  Return - Next").lettering(17, color: Color(red: 0.50, green: 0.88, blue: 0.81))
         }
-        .frame(minWidth: 860, minHeight: 600)
+        .padding(.horizontal, 54).padding(.top, 34).padding(.bottom, 20)
+        .background(HLStyle.ground.ignoresSafeArea())
+        .preferredColorScheme(.dark)
+        .frame(minWidth: 1040, minHeight: 700)
         .task { await app.checkForUpdates() }   // at every launch: quiet when offline
+    }
+
+    /// The short note at a pill's right edge: what the step has settled
+    func status(_ s: Step) -> String {
+        switch s {
+        case .mac: return app.macReady ? "Ready" : ""
+        case .game: return app.gameChosen ? "Loaded" : ""
+        case .phoneModel: return app.isMac ? "This Mac" : app.gpu == "g19p" ? "iPhone 18 Pro" : "iPhone 17"
+        case .build: return app.buildOK ? "Done" : app.busy && app.step == .build ? "Building" : ""
+        case .copy: return app.copyOK ? "Done" : ""
+        default: return ""
+        }
     }
 
     var canGoOn: Bool {
@@ -53,35 +133,23 @@ struct ContentView: View {
         case .done: DonePage()
         }
     }
-
-    func icon(_ s: Step) -> String {
-        switch s {
-        case .welcome: return "hand.wave"
-        case .mac: return "laptopcomputer"
-        case .game: return "opticaldiscdrive"
-        case .phoneModel: return "iphone"
-        case .build: return "hammer"
-        case .install: return "square.and.arrow.down"
-        case .copy: return "cable.connector"
-        case .done: return "gamecontroller"
-        }
-    }
 }
 
 struct PageTitle: View {
     let title: String, subtitle: String
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title).font(.largeTitle.bold())
-            Text(subtitle).foregroundStyle(.secondary)
-        }.padding(.bottom, 18)
+        VStack(spacing: 8) {
+            Text(title).font(.system(size: 30, weight: .bold, design: .serif)).foregroundStyle(.white).frame(maxWidth: .infinity)
+            HStack(spacing: 10) { Rectangle().fill(HLStyle.line).frame(height: 1); Rectangle().fill(HLStyle.teal).frame(width: 7, height: 7).rotationEffect(.degrees(45)); Rectangle().fill(HLStyle.line).frame(height: 1) }
+            Text(subtitle).foregroundStyle(Color(red: 0.81, green: 0.86, blue: 1)).multilineTextAlignment(.center).frame(maxWidth: .infinity)
+        }.padding(.bottom, 14)
     }
 }
 
 struct WelcomePage: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            PageTitle(title: "HookLink", subtitle: "Build The Legend of Zelda: Ocarina of Time (Nintendo Switch 2 Edition) for your iPhone, from your own copy of the game.")
+            PageTitle(title: "HookLink", subtitle: "Build The Legend of Zelda: Ocarina of Time (Nintendo Switch 2 Edition) for your iPhone or this Mac, from your own copy of the game.")
             Text("HookLink walks you through it:").font(.headline)
             VStack(alignment: .leading, spacing: 8) {
                 Label("Checks your Mac has what the build needs", systemImage: "1.circle")
@@ -174,13 +242,15 @@ struct PhonePage: View {
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            PageTitle(title: "Choose your iPhone", subtitle: "The app is built for your iPhone's graphics chip, so it starts quickly and runs smoothly.")
+            PageTitle(title: "Choose device", subtitle: "The app is built for your device's graphics chip, so it starts quickly and runs smoothly.")
             Picker("", selection: $app.gpu) {
                 ForEach(PhoneModel.all) { m in
                     Text(m.name + (m.tested ? "  (tested)" : "  (not tested yet)")).tag(m.id)
                 }
             }.pickerStyle(.radioGroup).labelsHidden()
-            if let m = PhoneModel.all.first(where: { $0.id == app.gpu }), !m.tested {
+            if app.isMac {
+                Text("Builds a Mac app you open with a double click. The game files go inside it, so there is nothing to install or copy afterwards. Not tested yet: the game wants a lot of memory, so a Mac with 16 GB or more is the safer choice. Please report how it runs.").foregroundStyle(.orange)
+            } else if let m = PhoneModel.all.first(where: { $0.id == app.gpu }), !m.tested {
                 Text("This model has not been tested yet. It should work; please report how it runs.").foregroundStyle(.orange)
             }
             Text("iPhone Duo uses the same chip but has not been tested yet. Other iPhones are not supported yet: the game needs a recent iPhone's memory and graphics.").font(.callout).foregroundStyle(.secondary)
@@ -205,10 +275,10 @@ struct BuildPage: View {
     @EnvironmentObject var app: HookLink
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            PageTitle(title: "Build", subtitle: "HookLink builds the iPhone app from your game. The first build takes a few hours; you can keep using your Mac.")
+            PageTitle(title: "Build", subtitle: "HookLink builds the \(app.isMac ? "Mac" : "iPhone") app from your game. The first build takes a few hours; you can keep using your Mac.")
             if app.buildOK {
                 Label("The app is ready", systemImage: "checkmark.seal.fill").font(.title2).foregroundStyle(.green)
-                HStack { Text(app.ipa.path).textSelection(.enabled).foregroundStyle(.secondary); Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([app.ipa]) } }
+                HStack { Text(app.product.path).textSelection(.enabled).foregroundStyle(.secondary); Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([app.product]) } }
             } else if app.busy {
                 Text("The progress is shown above. You can keep using your Mac.").foregroundStyle(.secondary)
                 Button("Stop") { app.cancel() }
@@ -285,15 +355,22 @@ struct DonePage: View {
     @EnvironmentObject var app: HookLink
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            PageTitle(title: "Play", subtitle: "Open the game on your iPhone.")
+            PageTitle(title: "Play", subtitle: app.isMac ? "Open the game on this Mac." : "Open the game on your iPhone.")
+            if app.isMac {
+                HStack {
+                    Button("Open the game") { NSWorkspace.shared.open(app.macApp) }.buttonStyle(.borderedProminent).controlSize(.large).disabled(!FileManager.default.fileExists(atPath: app.macApp.path))
+                    Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([app.macApp]) }
+                }
+                Text("The Mac app holds your game files: keep it on this Mac and never share it. Its saves are in its own folder in your Library, and its settings window opens before the game starts.").font(.callout).foregroundStyle(.secondary)
+            }
             VStack(alignment: .leading, spacing: 8) {
                 Text("• The first start shows \"Preparing shaders\" and can take a few minutes. Later starts take seconds.")
                 Text("• If the first session after installing feels slow, close the game fully (swipe it away) and open it again: the next start runs at full speed.")
                 Text("• A new area can stutter the first time you enter it. The next start prepares it, and it runs smoothly after that.")
                 Text("• The phone gets warm in long sessions; it runs best unplugged and not in a case.")
             }
-            SavesBox()
-            GroupBox {
+            if !app.isMac { SavesBox() }
+            if !app.isMac { GroupBox {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Small game files").font(.headline)
                     Text("Updates can change a few small files, like the iPhone resolution file. HookLink checks them when your iPhone is plugged in and sends only what changed. Your 24 GB of game files and your saves aren't touched.").font(.callout).foregroundStyle(.secondary)
@@ -303,7 +380,7 @@ struct DonePage: View {
                     }
                 }.padding(6)
             }
-            .task { await app.updateSmallFiles(auto: true) }
+            .task { await app.updateSmallFiles(auto: true) } }
             GroupBox {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Something wrong?").font(.headline)

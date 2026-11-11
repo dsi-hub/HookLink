@@ -13,9 +13,17 @@ struct PhoneModel: Identifiable, Hashable {
     let id: String          // GPU architecture for nxnative's --gpu
     let name: String
     let tested: Bool
+    static let macID = "mac"   // not a GPU for --gpu: this Mac itself (the build makes a Mac app, for this Mac's own GPU)
+    /// This Mac's chip, as System Information names it ("Apple M4 Pro")
+    static let macChip: String = {
+        var n = 0; sysctlbyname("machdep.cpu.brand_string", nil, &n, nil, 0)
+        var b = [CChar](repeating: 0, count: max(n, 1)); sysctlbyname("machdep.cpu.brand_string", &b, &n, nil, 0)
+        let c = String(cString: b).replacingOccurrences(of: "Apple ", with: ""); return c.isEmpty ? "Apple silicon" : c
+    }()
     static let all: [PhoneModel] = [
         PhoneModel(id: "g19p", name: "iPhone 18 Pro / 18 Pro Max / iPhone Duo (A20 Pro)", tested: true),
         PhoneModel(id: "g18p", name: "iPhone 17, 17 Pro, 17 Pro Max, Air (A19 / A19 Pro)", tested: false),
+        PhoneModel(id: macID, name: "This Mac, \(macChip)", tested: false),
     ]
 }
 
@@ -27,7 +35,7 @@ enum Step: Int, CaseIterable, Identifiable {
         case .welcome: return "Welcome"
         case .mac: return "Check your Mac"
         case .game: return "Choose your game"
-        case .phoneModel: return "Choose your iPhone"
+        case .phoneModel: return "Choose device"
         case .build: return "Build"
         case .install: return "Install"
         case .copy: return "Copy game files"
@@ -116,6 +124,13 @@ final class HookLink: ObservableObject {
     var folder: URL { URL(fileURLWithPath: (folderPath as NSString).expandingTildeInPath) }
     var workDir: URL { folder.appendingPathComponent("build") }
     var ipa: URL { folder.appendingPathComponent("HookLink-OcarinaOfTime.ipa") }
+    var isMac: Bool { gpu == PhoneModel.macID }   // the device chosen is this Mac: the build makes a Mac app, and the install and copy steps are skipped
+    var macApp: URL { folder.appendingPathComponent("Ocarina of Time (HookLink).app") }
+    var product: URL { isMac ? macApp : ipa }
+    /// The step after / before one, skipping the iPhone's install and copy steps for a Mac build
+    func step(after s: Step) -> Step { isMac && s == .build ? .done : Step(rawValue: s.rawValue + 1) ?? s }
+    func step(before s: Step) -> Step { isMac && s == .done ? .build : Step(rawValue: s.rawValue - 1) ?? s }
+    func offered(_ s: Step) -> Bool { !(isMac && (s == .install || s == .copy)) }
     var romfsImage: URL { workDir.appendingPathComponent("extract/\(Game.version)/RomFS.img") }
     var overlayFile: URL { support.appendingPathComponent("overlay/Pack/Bootup.Nin_Ounce_NVN2.pack.zs") }
 
@@ -289,12 +304,15 @@ final class HookLink: ObservableObject {
 
     func build() async {
         busy = true; buildOK = false; buildError = ""; damagedFiles = []; smallFilesChecked = false; defer { busy = false; endWork() }
-        beginWork("Building the iPhone app", steps: 6)
+        beginWork(isMac ? "Building the Mac app" : "Building the iPhone app", steps: 6)
         try? FileManager.default.createDirectory(at: workDir, withIntermediateDirectories: true)
-        var args = [venvPython.path, "-I", engine.appendingPathComponent("scripts/build_ipa_from_nsp.py").path, nupPath,
-                    "--platform", "ios", "--romfs", "separate", "--allow-damaged", "--gpu", gpu,
-                    "--env-file", resources.appendingPathComponent("presets/iphone.env").path,
-                    "--work-dir", workDir.path, "-o", ipa.path, "--progress", "json"]
+        var args = [venvPython.path, "-I", engine.appendingPathComponent("scripts/build_ipa_from_nsp.py").path, nupPath]
+        if isMac {   // a double-clickable Mac app for this Mac's own GPU; the game files go inside it, so nothing is copied afterwards
+            args += ["--platform", "mac-app", "--allow-damaged", "--env-file", resources.appendingPathComponent("presets/mac.env").path]
+        } else {
+            args += ["--platform", "ios", "--romfs", "separate", "--allow-damaged", "--gpu", gpu, "--env-file", resources.appendingPathComponent("presets/iphone.env").path]
+        }
+        args += ["--work-dir", workDir.path, "-o", product.path, "--progress", "json"]
         let name = appName.trimmingCharacters(in: .whitespacesAndNewlines)
         if !name.isEmpty { args += ["--app-name", name] }
         if !appIcon.isEmpty, FileManager.default.fileExists(atPath: appIcon) { args += ["--icon", appIcon] }
@@ -348,8 +366,8 @@ final class HookLink: ObservableObject {
             }
         }
         if status != 0, buildError.isEmpty, let hint = HookLink.plainError(log.suffix(200)) { buildError = hint }
-        if status == 0 && FileManager.default.fileExists(atPath: ipa.path) {
-            buildOK = true; stageFraction = 1; say("Done: \(ipa.path)")
+        if status == 0 && FileManager.default.fileExists(atPath: product.path) {
+            buildOK = true; stageFraction = 1; say("Done: \(product.path)")
         } else if buildError.isEmpty {
             buildError = "The build stopped (status \(status)). The last lines of the log say why."
         }
