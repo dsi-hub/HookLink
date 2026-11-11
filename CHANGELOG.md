@@ -1,5 +1,69 @@
 # Changelog
 
+## 1.8
+
+A new launcher inside the game, a choice of frame rate with frame generation, steadier memory, a new look for HookLink, Mac builds, and 64 engine commits from nxnative. Played on an iPhone 18 Pro Max in test builds. Please share your game log (**Extras → Export game log**) if something looks or runs wrong.
+
+**New: the game's launcher.** Before the game starts you get three tabs. Play is in the middle, and you can switch with L and R.
+- **Play:** the game, its version and a Play button, next to a summary of how it will run.
+- **Settings:** every option in one list.
+- **Extras:**
+  - Export your saves or the game log to Files, AirDrop or another app.
+  - Import a save. Your current save is backed up first.
+  - Cloud saves.
+  - Cheat files.
+  - **Reset to tested defaults.**
+  - The credits.
+
+**New: Frame rate mode.** One choice with four options:
+- 60 fps
+- 30 fps steady
+- **30 fps + frame generation** (the new default)
+- 60 fps + frame generation, for 120 Hz screens
+
+Frame generation draws 30 frames and MetalFX shows 60. On our iPhone 18 Pro Max it looked like 60 fps with no smearing, and the phone stays cooler. 60 fps + frame generation sat at about 35 fps in our test. Plain 60 fps restarted the phone once (see Known issues).
+
+**New defaults.** **Reset to tested defaults** sets the best settings we found: 30 fps + frame generation, and MetalFX upscaling.
+
+**Touch controls:**
+- An **opacity** slider (20–100%) fades all the on-screen controls together.
+- The Mobile layout now follows the Classic and Forest themes, with flat keys. Before, it stayed glassy whatever the theme.
+- Mobile, 3D, 2D and tap layouts and controllers all work as before.
+
+**Memory:** the 8 GB layout from 1.7 stays, without a mapping limit. A new last-resort cutoff stops the game from mapping past 10 GB, or past what iOS has left minus 768 MB, so the system frees cached memory instead of closing the game. 1.8 uses more memory than 1.7: about 6.4–6.9 GB in our test.
+
+**Wide view (still experimental):**
+- The game now lays out its screen at the wider width, so the HUD and menus should no longer be stretched. This has not been confirmed on a phone yet.
+- The 3D view is never widened twice.
+
+**Speed:** the thread that shows the game's frames now asks iOS for its own frame deadline. Before, iOS could keep it on the slow cores in Hyrule Field and the adult world. How much this helps has not been measured yet.
+
+**HookLink on the Mac:**
+- **A new look:** a sky with clouds, steps as buttons, and sharper lettering.
+- **Choose device** (shorter name) now lists:
+  - **iPhone 16 Pro / 16 Pro Max (A18 Pro):** not tested, and it has 8 GB of memory, so the game may close in busy areas.
+  - **This Mac:** builds a Mac app with the same launcher. New and **not tested yet**.
+
+**From nxnative (64 commits), the ones that matter here:**
+- **Building:** .NET is no longer needed. Shaders are finished in parallel worker processes, so a cold build uses all your Mac's cores.
+- **Graphics:**
+  - Movies into linear textures are no longer black.
+  - Padded texture layouts are fixed.
+  - NaN colours no longer show through blending.
+- **CPU:** frames share command allocators. Argument blocks are patched instead of encoded again. Uniform bounds are checked once per binding.
+- **Memory:** textures resized by dynamic resolution reuse recycled memory.
+- **Cloud saves:** when both saves changed, the launcher asks which one to keep. Automated runs never sync.
+- **Also from cheemu21:** the steady-30 and frame generation work this release builds on.
+
+**Known issues**
+- **Plain 60 fps** restarted an iPhone 18 Pro Max once in Hyrule Field. Use 30 fps + frame generation (the default) until this is found. If it happens to you, please send the log from your next start.
+- **60 fps + frame generation** reaches only about 35 fps in busy areas.
+- **Wide view** is still slower.
+- **Memory use** is higher than 1.7.
+- **Movies and subtitles** can still drift apart below 60 fps.
+
+**To update:** open HookLink and click **Update and rebuild**, then install the new app over the old one. Your saves and game files stay on the phone. This update changes the shaders, so every shader is compiled again, which takes about 2 hours. Keep the Mac awake and plugged in. Your launcher choices are kept, but the frame rate mode starts at the new default unless you changed it.
+
 ## 1.7
 
 Fixes the game stopping when you pull the Master Sword, makes Wide view widen the 3D world, and brings engine fixes from nxnative and from a tester. The fixes were played on an iPhone 18 Pro Max in test builds; the final 1.7 build itself has not been played yet, so please share your game log (**Get game log**) if something looks or runs wrong.

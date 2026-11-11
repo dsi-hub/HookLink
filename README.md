@@ -23,11 +23,12 @@ HookLink is a Mac app that turns your own dump of Ocarina of Time into an iPhone
 |---|---|
 | Kokiri Forest, Hyrule Field, Castle Town | ✅ Plays |
 | Sound, touch controls, controllers, saves | ✅ Works |
-| 60 fps | ⚠️ Most areas; Hyrule Field dips in the 40s–50s when the phone is warm |
+| Frame rate | ✅ 30 fps + frame generation (the default) looks like 60 and stays smooth. ⚠️ Plain 60 fps dips in busy areas and restarted the phone once in our test |
 | Stutter the first time you enter an area | ⚠️ Happens once; the next start prepares that area |
 | First start after installing | ⚠️ Long "Preparing shaders" screen, a few minutes, once |
 | iPhone 17 family (A19) | ✅ Runs on a 17 Pro (tested by a player): 30 fps + frame generation recommended |
 | iPhone 16 Pro / 16 Pro Max (A18 Pro) | ❓ Not tested yet; 8 GB of memory, so the game may close in busy areas |
+| Mac (This Mac) | ❓ New in 1.8 and not tested yet |
 | Older iPhones | ❌ Not supported (memory and graphics) |
 
 ## How to build
@@ -39,7 +40,7 @@ HookLink is a Mac app that turns your own dump of Ocarina of Time into an iPhone
 3. Follow the steps in the window:
    1. **Check your Mac**: HookLink finds what's missing and installs most of it for you.
    2. **Choose your game**: drop your `.nup` file in.
-   3. **Choose your iPhone** model.
+   3. **Choose device**: your iPhone model, or **This Mac** to build a Mac app (new, not tested yet).
    4. **Build**: a few hours the first time. You can keep using your Mac.
    5. **Install** the IPA with your sideloading tool.
    6. **Copy game files**: plug in your iPhone and click one button (or use Finder, if the cable copy keeps stopping).
@@ -64,7 +65,7 @@ HookLink is a Mac app that turns your own dump of Ocarina of Time into an iPhone
 - [Homebrew](https://brew.sh).
 - About **80 GB free** while building. The build folder keeps about 70 GB afterwards so later builds are fast; see [Disk space](#disk-space).
 - Your game: program `0400486024DEC000`, update `v131072`, as a `.nup`. Other versions don't work.
-- An iPhone 18 Pro / Pro Max (tested) or an iPhone 17 model (untested), with **Developer Mode** on, and a cable.
+- An iPhone 18 Pro / Pro Max (tested), an iPhone 17 model (played by a tester) or an iPhone 16 Pro / Pro Max (untested), with **Developer Mode** on, and a cable. Or build for your Mac instead (untested).
 - A sideloading tool such as iLoader, Sideloadly or AltStore.
 
 ### From the command line
