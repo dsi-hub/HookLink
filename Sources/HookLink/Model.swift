@@ -23,6 +23,7 @@ struct PhoneModel: Identifiable, Hashable {
     static let all: [PhoneModel] = [
         PhoneModel(id: "g19p", name: "iPhone 18 Pro / 18 Pro Max / iPhone Duo (A20 Pro)", tested: true),
         PhoneModel(id: "g18p", name: "iPhone 17, 17 Pro, 17 Pro Max, Air (A19 / A19 Pro)", tested: false),
+        PhoneModel(id: "g17p", name: "iPhone 16 Pro / 16 Pro Max (A18 Pro)", tested: false),
         PhoneModel(id: macID, name: "This Mac, \(macChip)", tested: false),
     ]
 }

@@ -26,7 +26,8 @@ HookLink is a Mac app that turns your own dump of Ocarina of Time into an iPhone
 | 60 fps | ⚠️ Most areas; Hyrule Field dips in the 40s–50s when the phone is warm |
 | Stutter the first time you enter an area | ⚠️ Happens once; the next start prepares that area |
 | First start after installing | ⚠️ Long "Preparing shaders" screen, a few minutes, once |
-| iPhone 17 family (A19) | ❓ Should work, not tested yet |
+| iPhone 17 family (A19) | ✅ Runs on a 17 Pro (tested by a player): 30 fps + frame generation recommended |
+| iPhone 16 Pro / 16 Pro Max (A18 Pro) | ❓ Not tested yet; 8 GB of memory, so the game may close in busy areas |
 | Older iPhones | ❌ Not supported (memory and graphics) |
 
 ## How to build

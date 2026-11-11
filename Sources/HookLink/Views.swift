@@ -97,6 +97,7 @@ struct ContentView: View {
         .preferredColorScheme(.dark)
         .frame(minWidth: 1040, minHeight: 700)
         .task { await app.checkForUpdates() }   // at every launch: quiet when offline
+        .onAppear { if let v = ProcessInfo.processInfo.environment["HOOKLINK_STEP"], let n = Int(v), let s = Step(rawValue: n) { app.step = s } }   // development: open on a step (screenshots)
     }
 
     /// The short note at a pill's right edge: what the step has settled
@@ -250,10 +251,12 @@ struct PhonePage: View {
             }.pickerStyle(.radioGroup).labelsHidden()
             if app.isMac {
                 Text("Builds a Mac app you open with a double click. The game files go inside it, so there is nothing to install or copy afterwards. Not tested yet: the game wants a lot of memory, so a Mac with 16 GB or more is the safer choice. Please report how it runs.").foregroundStyle(.orange)
+            } else if app.gpu == "g17p" {
+                Text("Not tested yet. The iPhone 16 Pro has 8 GB of memory, less than the iPhones HookLink was tested on, so the game may close in busy areas. Start with 30 fps + frame generation, and please report how it runs.").foregroundStyle(.orange)
             } else if let m = PhoneModel.all.first(where: { $0.id == app.gpu }), !m.tested {
                 Text("This model has not been tested yet. It should work; please report how it runs.").foregroundStyle(.orange)
             }
-            Text("iPhone Duo uses the same chip but has not been tested yet. Other iPhones are not supported yet: the game needs a recent iPhone's memory and graphics.").font(.callout).foregroundStyle(.secondary)
+            Text("iPhone Duo uses the A20 Pro but has not been tested yet. Older iPhones are not supported: the game needs a recent iPhone's memory and graphics.").font(.callout).foregroundStyle(.secondary)
             GroupBox("Name and icon (optional)") {
                 VStack(alignment: .leading, spacing: 10) {
                     TextField("App name (leave empty for the game's own name)", text: $app.appName).textFieldStyle(.roundedBorder)
