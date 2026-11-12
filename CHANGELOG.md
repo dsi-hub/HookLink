@@ -1,5 +1,60 @@
 # Changelog
 
+## 1.8.5
+
+A hotfix for 1.8's frame rate. Players found 1.5.1 ran better: the main reason was ours, and it is fixed. 60 fps is the default again. This update also brings the 1.9 work that was ready: a save editor, Wide view with the HUD kept in place, better frame generation, and a fix for a crash about 11 minutes in. **This build has been compiled and checked on our Mac, but not yet played on a phone**, so please share your game log (**Extras → Export game log**) if something looks or runs wrong.
+
+### Why 1.8 ran worse than 1.5.1, and what changed
+
+- **A fixed CPU budget made for 60 fps.** Since HookLink 0.1, the iPhone preset told iOS the game's main thread needs at most 12 ms a frame. That suited 60 fps, which 1.5.1 used. 1.8 made 30 fps + frame generation the default, where the thread needs more than 12 ms: iOS stalled it on most frames (in our 1.8 log every frame was late). The engine now measures what the thread needs and tells iOS that (`DM_RT_COMP=auto`). With it, a 1.8 build held a steady 30 fps for 10 minutes where 1.8 kept dropping. This also reaches older HookLink apps: the engine treats the old preset's 12 as measured.
+- **60 fps is the default Frame rate mode again**, as in 1.5.1. 30 fps + frame generation is still one tap away and runs cooler.
+- **Two rendering settings are back to how 1.5.1 and 1.7 ran.** 1.8 turned on lossy compression of render targets and side-by-side compute work along with the steady 30 fps mode. Both are off again. 60 fps restarted an iPhone 18 Pro Max once on 1.8; we have not found the cause, and these two changes are the main difference at 60 fps between 1.8 and 1.7.
+
+What stays from 1.7 and 1.8 because it is needed: the larger memory layout that gets you past the Master Sword, and real game speed below 60 fps (before 1.7 the game ran 9 to 17% too fast when the frame rate dropped, which could feel snappier but was wrong).
+
+### Fixed: a crash about 11 minutes in
+
+When you enter a new area, the game rebuilds each model's materials on a background thread, with memory from small heaps of the model's own. When one of those was full, the game went on with nothing and crashed (on our iPhone: `BufferInitialize: pool has no storage`, 11 minutes in). Each of those four allocations is now tried again in the heap's parent heaps, which have room, and last in the game's default heap. Hookshot found the same crash on PCs (NotRexed/Hookshot issue 1697); our fix is our own. `DM_HEAP_RETRY=0` turns it off.
+
+### New: Save editor (Extras)
+
+**OOT SW2SE** by Traiver and contributors, built into the launcher. It opens your own saves, no file picker:
+
+- Change rupees, hearts, magic, items, bottles, small keys, bag and quiver sizes, masks and quest flags.
+- **Export to folder** writes the changes into your saves after you confirm. Your saves as they were are copied to `save-backups/editor-<time>` first.
+- **Export ZIP** saves a patch file in Files (`save-editor`) and leaves your saves as they are.
+
+Edits can break a save: keep the backups.
+
+### Wide view (experimental): the HUD and menus stay in place
+
+With Wide view on, the 3D view fills the screen while the HUD, menus and movies keep their 16:9 shape in the middle, as on a 16:9 screen. The pause menu backgrounds, the item wheel and the fades still cover the whole screen. The sites are Ivan0xFF's (MIT), found through NX2navi. Wide view is still slower than the normal view.
+
+### Frame generation, from cheemu21
+
+- It finds motion between the two real frames itself, so fast camera turns are placed better, and the HUD is taken from the real frame so it stays sharp.
+- A single late frame no longer drops you to 30: generation pauses only for that frame. While frames keep dropping it stops, and comes back after 30 frames in time.
+- **Frame generation size** (Settings): Lighter makes the in-between frames at 0.75 size, for about half of frame generation's GPU time and a slightly softer picture.
+
+### New setting: Deadline boost (Performance, off)
+
+Tells iOS each frame's deadline, so it keeps the game's frame threads on the fast cores at a higher clock. It uses more power and heat. Try it if the frame rate drops as the phone warms.
+
+### Known issues
+
+- **Busy areas can still dip at 60 fps.** After some area changes the game's own logic needs more CPU than the phone gives it at 60 (on a test build it fell from 30 to 16–20 fps at 30 fps after an area change). We are still testing a change that keeps all of the game's threads at full priority.
+- **60 fps restarted the phone once on 1.8.** If it happens on 1.8.5, open the game again and send the log.
+- **1.8.5 has not been played on a phone yet** (see the top).
+- Movies and subtitles can drift apart below 60 fps.
+
+### To update
+
+Open HookLink and click **Update and rebuild**, then install the new app over the old one. Your saves and game files stay on the phone. **The shaders do not change, so no 2-hour recompile**: the rebuild took about 40 minutes on our Mac. Download the new HookLink app too: it has the updated preset (the engine applies the main fix either way).
+
+### Credits
+
+Traiver and contributors (OOT SW2SE), Ivan0xFF (Wide view HUD sites) and tangerineturtle1 (NX2navi), cheemu21 (frame generation), NotRexed's Hookshot and TomShafford (the full-heap finding), and everyone who reported 1.8 running worse than 1.5.1.
+
 ## 1.8
 
 Ocarina of Time now builds as a **native Mac app** as well as an iPhone app. 1.8 also brings:
