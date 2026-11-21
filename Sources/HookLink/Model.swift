@@ -313,7 +313,9 @@ final class HookLink: ObservableObject {
             args += ["--platform", "mac-app", "--allow-damaged", "--env-file", resources.appendingPathComponent("presets/mac.env").path]
         } else {
             args += ["--platform", "ios", "--romfs", "separate", "--allow-damaged", "--env-file", resources.appendingPathComponent("presets/iphone.env").path]
-            if !smallIPA { args += ["--gpu", gpu] }   // the archive for this GPU (over 4 GB for the A20 Pro); without it the first start prepares the pipelines on the phone
+            // the archive for this GPU (over 4 GB for the A20 Pro); without it the first start prepares the pipelines on the phone. Leaving --gpu out is not enough:
+            // the engine then takes the profile's pso_gpu (applegpu_g19p for Ocarina) and packs the archive anyway
+            args += ["--gpu", smallIPA ? "none" : gpu]
         }
         args += ["--work-dir", workDir.path, "-o", product.path, "--progress", "json"]
         let name = appName.trimmingCharacters(in: .whitespacesAndNewlines)
