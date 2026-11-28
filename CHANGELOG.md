@@ -1,5 +1,45 @@
 # Changelog
 
+## X4 (5.0)
+
+HookLink X4 brings the newest nxnative, 40 fps on 120 Hz screens, HDR, Ocarina of Time 1.0.0 support, and fixes for the freezes players reported on Discord.
+
+### Before you update
+
+- **The shaders recompile.** nxnative's shader translator changed again, so the first build after updating takes about an hour. Keep the Mac plugged in.
+- **The first start on the phone prepares pipelines again**, behind the progress screen. Keep the phone plugged in and cool while it does.
+
+### New
+
+- **40 fps** (Settings → Frame rate, on 120 Hz screens such as the Pro iPhones): smoother than 30 fps and cooler than 60. Each frame is held for exactly three refreshes, so motion stays even.
+- **HDR** (Settings → HDR, also in the Play tab's side panel): on a screen with HDR, *Game's HDR* shows Ocarina's own HDR grade, with brighter highlights. *BT.2446* brightens the normal picture instead. Off by default; HDR uses a little more battery.
+- **Ocarina of Time 1.0.0** is supported (frame timing and dynamic resolution), not just the updated version.
+- **A/B buttons** (Settings → Controls, thanks oliverames): pick the Xbox / PlayStation layout to have A at the bottom and B on the right of a controller and of the 2D and 3D touch layouts.
+- **Measured game step** (Settings → Performance): on by default. If your phone can't hold the frame rate in busy places and the game seems to speed up and slow down, turn it off for a steady pace (HookLink issue 3).
+
+### Faster and smoother
+
+- **The newest nxnative**, about 580 changes since X3, including:
+  - **Pipeline lists for Ocarina of Time** collected from players, so fewer places stutter the first time you visit them.
+  - **Less GPU work every frame**: the texture-tracking work runs only when the scene changes, not in every frame.
+- **A sharper picture**: the game view now lines up with the screen's pixels, so it is no longer stretched by a fraction of a pixel (thanks oliverames).
+- **Less memory churn in movies**: video decoding reuses one buffer instead of making a new one per frame (thanks oliverames and kencalx).
+
+### Fixes
+
+- **iPhone Air and other 8 GB phones: fewer freezes when memory runs out.** When iOS reports critical memory, unused textures and render targets are released at once (from kid-with-sword-remake L8.2), and an out-of-memory refusal now triggers the same release before it can add up.
+- **0 fps after switching apps.** Coming back to the game now restarts the frame pipeline if it got stuck while the app was in the background.
+- **Installs without the increased memory limit** (Sideloadly with a free Apple ID) now get a clear message to reinstall with iLoader instead of a crash.
+- **The cloud saves folder picker** opens reliably.
+
+### Sharing pipeline lists
+
+- X4 sends the list of pipelines your phone had to prepare to nxnative's pipeline inbox, once per new list: only that list (pipeline IDs), the game's title ID and the app version, nothing else. This is how lists like Ocarina's above get collected. Turn it off in the in-game menu: *Contribute prewarm lists automatically*.
+
+### Known issues
+
+- GPU occlusion is still experimental and off by default.
+
 ## X3 (4.0)
 
 HookLink X3 brings the latest nxnative, less GPU work per frame, a lower memory footprint, mods, and a redesigned launcher with your own background pictures.
